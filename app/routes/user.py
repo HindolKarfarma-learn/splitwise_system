@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends,HTTPException,APIRouter,Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 from app.model.user import User
-from app.model.auth_model import UserCreate, UserLogin
+from app.schema.user import UserCreate, UserLogin
 from app.db import get_db
 from sqlalchemy.future import select
 from app.auth import generate_token,get_token,verify_token
@@ -51,4 +51,4 @@ async def create_user(request:Request,token: str = Depends(get_token), db: Async
     username=username.scalar_one_or_none()
     if not username:
         raise HTTPException(status_code=400, detail="User not found ,cheak your token")
-    return {"name":username}
+    return {"username":username}
