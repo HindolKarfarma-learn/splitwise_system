@@ -10,7 +10,7 @@ class User(Base):
 
     id: Mapped[int]=mapped_column(primary_key=True,index=True, autoincrement=True)
     name: Mapped[str]=mapped_column(String(50))
-    email12: Mapped[str]=mapped_column(String(70),unique=True)
+    email: Mapped[str]=mapped_column(String(70),unique=True)
     password_hash: Mapped[str] = mapped_column(String(255))
     @property 
     def password(self):

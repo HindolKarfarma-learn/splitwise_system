@@ -1,10 +1,10 @@
 from fastapi import FastAPI, Depends,HTTPException,APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
-from app.models.user import User
-from app.model.auth_models import UserCreate, UserLogin
+from app.model.user import User
+from app.model.auth_model import UserCreate, UserLogin
 from app.db import get_db
-
+from sqlalchemy.future import select
 router = APIRouter()
 
 @router.get("/users")
@@ -26,5 +26,4 @@ async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
 
     db.add(new_user)     # add to DB
     await db.commit()          # save permanently
-    db.refresh(new_user) # get updated data (like id)
     return HTTPException(status_code=200, detail="User Created")
