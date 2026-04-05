@@ -26,3 +26,4 @@ class User(Base):
     def verify_password(self, password: str) -> bool:
         return bcrypt.checkpw(password.encode(), self.password_hash.encode())
     
+
