@@ -1,15 +1,26 @@
-from fastapi import FastAPI, Depends,HTTPException
-from sqlalchemy.orm import Session
-# import models
-from app.routes import users, group, expenses
-from app import models
+from fastapi import FastAPI
+from app.routes import user
+from app.database import engine
+from app.model.user import User, Base
+from starlette.middleware.sessions import SessionMiddleware
 
-from app.db import Base,get_db,engine
+app=FastAPI()
 
-app = FastAPI()
+app.add_middleware(
+    SessionMiddleware, 
+    secret_key="your_secret_key"
+)
 
-Base.metadata.create_all(bind=engine)
+async def init_db():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
-app.include_router(users.router,    prefix="/users",    tags=["Users"])
-app.include_router(group.router,   prefix="/groups",   tags=["Groups"])
-app.include_router(expenses.router, prefix="/expenses", tags=["Expenses"])
+app.include_router(user.router, prefix="/user", tags=["user"])
+
+@app.on_event("startup")
+async def on_startup():
+    await init_db()
+
+@app.get("/")
+async def root():
+    return {"message": "Welcome to the FastAPI app"}
