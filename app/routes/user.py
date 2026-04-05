@@ -5,18 +5,7 @@ from app.model.user import User
 from app.model.auth_model import UserCreate, UserLogin
 from app.db import get_db
 from sqlalchemy.future import select
-from jose import jwt
-from dotenv import load_dotenv
-import os
-from datetime import datetime, timedelta
-from fastapi.security import HTTPBearer,HTTPAuthorizationCredentials
-
-load_dotenv()
-SECRET_KEY=os.getenv("SECRET_KEY")
-ALGORITHM=os.getenv("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
-security = HTTPBearer()
-
+from app.auth import generate_token,get_token,verify_token
 
 router = APIRouter()
 
@@ -50,22 +39,16 @@ async def create_user(user: UserLogin, db: AsyncSession = Depends(get_db)):
     
     if not user_if.verify_password(user.password):
         raise HTTPException(status_code=400, detail="Invalid password")
-    exp=datetime.now()+timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    token = jwt.encode({"id":user_if.id,"exp":exp},SECRET_KEY,ALGORITHM)
-
+    
+    token=generate_token(user_if.id)
     return {"token": token}
-
-def get_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    token = credentials.credentials
-    return token
 
 @router.post("/Uname")
 async def create_user(request:Request,token: str = Depends(get_token), db: AsyncSession = Depends(get_db)):
     # token=request.headers.get("authorization") #for non swagger ui
-    
-    token=token.split(" ")[-1]
-    data= jwt.decode(token,SECRET_KEY,ALGORITHM)
-    print("TOKEN RECEIVED:", data)
-    username =await db.execute(select(User.name).where(User.id==data.get("id")))
+    uid=verify_token(token)
+    username =await db.execute(select(User.name).where(User.id==uid))
     username=username.scalar_one_or_none()
+    if not username:
+        raise HTTPException(status_code=400, detail="User not found ,cheak your token")
     return {"name":username}
