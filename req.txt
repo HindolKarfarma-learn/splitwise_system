@@ -2,8 +2,6 @@ fastapi
 uvicorn
 sqlalchemy
 aiomysql
-<<<<<<< HEAD
 python-dotenv
-=======
-python-dotenv
->>>>>>> 24c51401627c56b78b214bfe91daaea92a1148b4
+itsdangerous
+bcrypt

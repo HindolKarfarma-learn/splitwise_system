@@ -4,7 +4,13 @@ from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from typing import AsyncGenerator
+
 load_dotenv()
+
+from sqlalchemy.orm import DeclarativeBase
+
+class Base(DeclarativeBase):
+    pass
 
 DATABASE_URL=os.getenv("DB_URL_SQL")
 
