@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-class groupCreate(BaseModel):
+class GroupCreate(BaseModel):
     name: str
    
 class AddMember(BaseModel):
