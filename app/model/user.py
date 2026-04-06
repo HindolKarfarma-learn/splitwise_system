@@ -1,9 +1,8 @@
 from sqlalchemy import Column, Integer, String 
-from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped
+from sqlalchemy.orm import mapped_column, Mapped,relationship
 import bcrypt
 
-class Base(DeclarativeBase):
-    pass    # using Declbase class for newer mapped_column
+from app.db import Base
 
 class User(Base):
     __tablename__="users"
@@ -12,6 +11,8 @@ class User(Base):
     name: Mapped[str]=mapped_column(String(50))
     email: Mapped[str]=mapped_column(String(70),unique=True)
     password_hash: Mapped[str] = mapped_column(String(255))
+    groups = relationship("user_group_members", back_populates="user")
+    
     @property 
     def password(self):
         raise AttributeError("Password is write-only use verify_password(pssword:str)->bool to cheak for password")
