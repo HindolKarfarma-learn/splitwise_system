@@ -10,7 +10,7 @@ class ExpenseSplit(Base):
     expense_id: Mapped[int] = mapped_column(ForeignKey("expenses.id"))
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
-    amount_owed: Mapped[float] = mapped_column(Float)
+    amount_owed: Mapped[int] = mapped_column()
 
     __table_args__ = (
         UniqueConstraint("expense_id", "user_id"),
