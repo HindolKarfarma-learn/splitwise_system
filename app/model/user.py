@@ -12,7 +12,7 @@ class User(Base):
     email: Mapped[str]=mapped_column(String(70),unique=True)
     password_hash: Mapped[str] = mapped_column(String(255))
     groups = relationship("user_group_members", back_populates="user")
-    
+    expense_splits= relationship("ExpenseSplit", back_populates="user")
     @property 
     def password(self):
         raise AttributeError("Password is write-only use verify_password(pssword:str)->bool to cheak for password")

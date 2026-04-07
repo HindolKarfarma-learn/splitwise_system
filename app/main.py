@@ -1,7 +1,6 @@
 from fastapi import FastAPI
-from app.routes import user,group
+from app.routes import user,group,expense
 from app.db import engine,Base
-from app.model.user import User
 from starlette.middleware.sessions import SessionMiddleware
 
 app=FastAPI()
@@ -17,7 +16,8 @@ async def init_db():
 
 app.include_router(user.router, prefix="/auth", tags=["user"])
 app.include_router(group.router, prefix="/groups", tags=["user"])
-# app.include_router(auth_routes.router, prefix="/auth", tags=["auth"])
+app.include_router(expense.router, prefix="/expences", tags=["user"])
+
 @app.on_event("startup")
 async def on_startup():
     await init_db()
