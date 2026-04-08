@@ -3,6 +3,9 @@
 ### add your own .env file and write
 ```python
 DB_URL_SQL=mysql+aiomysql://root:Password@localhost:3306/Database
+SECRET_KEY=AnyLongKey
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
 
 put your database and its password 
