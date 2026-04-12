@@ -11,7 +11,7 @@ router = APIRouter()
 
 @router.get("/users")
 async def get_users(db: AsyncSession = Depends(get_db)):
-    users = await db.query(User).all()
+    users =( await db.execute(select(User))).scalar_one_or_none()
     return users
 
 @router.post("/register")
@@ -31,7 +31,7 @@ async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
     return HTTPException(status_code=200, detail="User Created")
 
 @router.post("/login")
-async def create_user(user: UserLogin, db: AsyncSession = Depends(get_db)):
+async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
     check_user= await db.execute(select(User).where(User.email==user.email))
     user_if=check_user.scalar_one_or_none()
     if not user_if:
@@ -44,7 +44,7 @@ async def create_user(user: UserLogin, db: AsyncSession = Depends(get_db)):
     return {"token": token}
 
 @router.post("/Uname")
-async def create_user(request:Request,token: str = Depends(get_token), db: AsyncSession = Depends(get_db)):
+async def show_user(request:Request,token: str = Depends(get_token), db: AsyncSession = Depends(get_db)):
     # token=request.headers.get("authorization") #for non swagger ui
     uid=verify_token(token)
     username =await db.execute(select(User.name).where(User.id==uid))

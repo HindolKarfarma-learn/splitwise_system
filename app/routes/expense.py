@@ -12,7 +12,7 @@ from app.model.user_group_member import user_group_members
 
 
 
-
+from app.model.owed import Owed 
 from fastapi import Depends,HTTPException,APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 # import models
@@ -24,12 +24,54 @@ from app.db import Base,get_db
 
 router = APIRouter()
 
+async def update_balance(db, debtor_id: int, creditor_id: int, amount: float):
+    if debtor_id == creditor_id:
+        return
+
+    reverse = (await db.execute(
+        select(Owed).where(
+            Owed.from_user_id == creditor_id,
+            Owed.to_user_id == debtor_id
+        )
+    )).scalar_one_or_none()
+
+    if reverse:
+        if reverse.amount > amount:
+            reverse.amount -= amount
+        elif reverse.amount < amount:
+            new_amount = amount - reverse.amount
+            await db.delete(reverse)
+
+            db.add(Owed(
+                from_user_id=debtor_id,
+                to_user_id=creditor_id,
+                amount=new_amount
+            ))
+        else:
+            await db.delete(reverse)
+    else:
+        existing = (await db.execute(
+            select(Owed).where(
+                Owed.from_user_id == debtor_id,
+                Owed.to_user_id == creditor_id
+            )
+        )).scalar_one_or_none()
+
+        if existing:
+            existing.amount += amount
+        else:
+            db.add(Owed(
+                from_user_id=debtor_id,
+                to_user_id=creditor_id,
+                amount=amount
+            ))
+
 
 @router.post("/")
 async def create_expenses(
     expenseschema: expensesCreate,
     db: AsyncSession = Depends(get_db),
-    token: str = Depends(get_token),
+    token: str = Depends(get_token)
 ):
     uid = verify_token(token)
 
@@ -82,6 +124,12 @@ async def create_expenses(
             user_id=split.user_id,
             amount_owed=split.ammount
         ))
+        await update_balance(
+        db,
+        debtor_id=split.user_id,
+        creditor_id=expenseschema.paid_by,
+        amount=split.ammount
+        )
 
     await db.commit()
 
